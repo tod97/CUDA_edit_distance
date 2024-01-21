@@ -5,7 +5,6 @@ using namespace chrono;
 
 // MACROS
 #define MIN(x, y) (x < y ? x : y)
-#define MAX(x, y) (x > y ? x : y)
 
 string generateWord(int n)
 {
@@ -49,6 +48,44 @@ int sequentialDistance(string A, string B)
 	return D[lenA][lenB];
 }
 
+__global__ void editDistKernel(char *devA, char *devB, int lenA, int lenB, unsigned int *devPPrevDiag, unsigned int *devPrevDiag, unsigned int *devCurrDiag, int diagIdx)
+{
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	int diagSize = (diagIdx <= lenA + 1) ? diagIdx : ((2 * (lenA+1)) - diagIdx);
+
+	/* if (tid == 0) {
+		printf("diagSize: %d\n", diagSize);
+		for (int j = 0; j <= lenA; j++) printf("%d ", devPPrevDiag[j]);
+		printf("-----------\n");
+		for (int j = 0; j <= lenA; j++) printf("%d ", devPrevDiag[j]);
+		printf("\n");
+	} */
+
+	if (tid < diagSize) {
+		if (diagIdx <= lenA + 1) {
+			if (tid == 0)
+				devCurrDiag[tid] = devPrevDiag[tid] + 1;
+			if (tid == diagSize - 1)
+				devCurrDiag[tid] = devPrevDiag[tid - 1] + 1;
+
+			if (tid > 0 && tid < diagSize - 1) {
+				if (devA[tid - 1] != devB[diagSize - tid - 2])
+					devCurrDiag[tid] = 1 + MIN(devPrevDiag[tid - 1], MIN(devPPrevDiag[tid - 1], devPrevDiag[tid]));
+				else
+					devCurrDiag[tid] = devPPrevDiag[tid - 1];
+			}
+		} else {
+			int pprevIdx = (lenA - diagSize == 0) ? tid : tid + 1;
+			if (devA[tid + lenA - diagSize] != devB[lenA - tid - 1]) {
+				devCurrDiag[tid] = 1 + MIN(devPrevDiag[tid], MIN(devPPrevDiag[pprevIdx], devPrevDiag[tid + 1]));
+			}
+			else {
+				devCurrDiag[tid] = devPPrevDiag[pprevIdx];
+			}
+		}
+	}
+}
+
 int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 {
 	int distance;
@@ -79,7 +116,20 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 	cudaMemcpy((void *)devPPrevDiag, (void *)pprevDiag, (lenA + 1) * sizeof(unsigned int), cudaMemcpyHostToDevice);
 	cudaMemcpy((void *)devPrevDiag, (void *)prevDiag, (lenA + 1) * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
+	for (int i = 3; i < 2 * (lenA + 1); i++)
+	{
+		int blockSize = min(lenA + 1, 512);
+		int gridSize = ceil((lenA + 1) / blockSize);
 
+		editDistKernel<<<gridSize, blockSize>>>(devA, devB, lenA, lenB, devPPrevDiag, devPrevDiag, devCurrDiag, i);
+
+		unsigned int *tmp = devPPrevDiag;
+		devPPrevDiag = devPrevDiag;
+		devPrevDiag = devCurrDiag;
+		devCurrDiag = tmp;
+	}
+	// CUDA get result from device
+	cudaMemcpy((void *)&distance, (void *)&devPrevDiag[0], 1 * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 
 	// CUDA free device memory
 	cudaFree(devA);
@@ -93,9 +143,9 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 
 int main()
 {
-	int n = 10;
-	string A = generateWord(n);
-	string B = generateWord(n);
+	int n = 4;
+	string A = "abce";//generateWord(n);
+	string B = "abcd";//generateWord(n);
 
 	cout << "--------- STRING LENGTH = " << n << " ---------" << endl;
 	// SEQUENTIAL
