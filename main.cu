@@ -168,8 +168,8 @@ int main()
 			sequentialDistance(Awords[j], Bwords[j]);
 		}
 		auto end = system_clock::now();
-		auto elapsed = duration_cast<milliseconds>(end - start) / nTests;
-		cout << "Sequential: " << elapsed.count() << "ms" << endl;
+		auto seqElapsed = duration_cast<milliseconds>(end - start) / nTests;
+		cout << "Sequential: " << seqElapsed.count() << "ms" << endl;
 		cout << "-----------------------------------------" << endl;
 
 		// PARALLEL
@@ -178,7 +178,9 @@ int main()
 			parallelDistance(Awords[j].c_str(), Bwords[j].c_str(), n, n);
 		}
 		end = system_clock::now();
-		elapsed = duration_cast<milliseconds>(end - start) / nTests;
+		auto elapsed = duration_cast<milliseconds>(end - start) / nTests;
 		cout << "Parallel: " << elapsed.count() << "ms" << endl;
+		cout << "Speedup: " << (float)seqElapsed.count() / elapsed.count() << "x" << endl;
+		cout << "-----------------------------------------" << endl;
 	}
 }
