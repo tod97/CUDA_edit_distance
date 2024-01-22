@@ -1,8 +1,10 @@
 #include <iostream>
 #include <chrono>
+#include <vector>
 using namespace std;
 using namespace chrono;
 
+#define nTests 10
 // MACROS
 #define MIN(x, y) (x < y ? x : y)
 
@@ -45,6 +47,7 @@ int sequentialDistance(string A, string B)
 		}
 	}
 
+	cout << "Distance: " << D[lenA][lenB] << endl;
 	return D[lenA][lenB];
 }
 
@@ -138,27 +141,44 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 	cudaFree(devPrevDiag);
 	cudaFree(devCurrDiag);
 
+	cout << "Distance: " << distance << endl;
 	return distance;
 }
 
 int main()
 {
-	int n = 10000;
-	string A = generateWord(n);
-	string B = generateWord(n);
+	vector<int> sizes = {1000, 10000, 50000, 100000};
 
-	cout << "--------- STRING LENGTH = " << n << " ---------" << endl;
-	// SEQUENTIAL
-	auto start = system_clock::now();
-	int distance = sequentialDistance(A, B);
-	auto end = system_clock::now();
-	auto elapsed = duration_cast<milliseconds>(end - start);
-	cout << "Sequential [d=" << distance << "]: " << elapsed.count() << "ms" << endl;
+	for (int i = 0; i < sizes.size(); i++)
+	{
+		int n = sizes[i];
+		vector<string> Awords = {};
+		vector<string> Bwords = {};
 
-	// PARALLEL
-	start = system_clock::now();
-	distance = parallelDistance(A.c_str(), B.c_str(), n, n);
-	end = system_clock::now();
-	elapsed = duration_cast<milliseconds>(end - start);
-	cout << "Parallel [d=" << distance << "]: " << elapsed.count() << "ms" << endl;
+		for (int j = 0; j < nTests; j++)
+		{
+			Awords.push_back(generateWord(n));
+			Bwords.push_back(generateWord(n));
+		}
+
+		cout << "--------- STRING LENGTH = " << n << " ---------" << endl;
+		// SEQUENTIAL
+		auto start = system_clock::now();
+		for (int j = 0; j < nTests; j++) {
+			sequentialDistance(Awords[j], Bwords[j]);
+		}
+		auto end = system_clock::now();
+		auto elapsed = duration_cast<milliseconds>(end - start) / nTests;
+		cout << "Sequential: " << elapsed.count() << "ms" << endl;
+		cout << "-----------------------------------------" << endl;
+
+		// PARALLEL
+		start = system_clock::now();
+		for (int j = 0; j < nTests; j++) {
+			parallelDistance(Awords[j].c_str(), Bwords[j].c_str(), n, n);
+		}
+		end = system_clock::now();
+		elapsed = duration_cast<milliseconds>(end - start) / nTests;
+		cout << "Parallel: " << elapsed.count() << "ms" << endl;
+	}
 }
