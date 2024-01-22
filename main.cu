@@ -118,8 +118,8 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 
 	for (int i = 3; i < 2 * (lenA + 1); i++)
 	{
-		int blockSize = min(lenA + 1, 512);
-		int gridSize = ceil((lenA + 1) / blockSize);
+		int blockSize = min(i, 1024);
+		int gridSize = ceil(float(i) / blockSize);
 
 		editDistKernel<<<gridSize, blockSize>>>(devA, devB, lenA, lenB, devPPrevDiag, devPrevDiag, devCurrDiag, i);
 
@@ -143,9 +143,9 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 
 int main()
 {
-	int n = 4;
-	string A = "abce";//generateWord(n);
-	string B = "abcd";//generateWord(n);
+	int n = 10000;
+	string A = generateWord(n);
+	string B = generateWord(n);
 
 	cout << "--------- STRING LENGTH = " << n << " ---------" << endl;
 	// SEQUENTIAL
