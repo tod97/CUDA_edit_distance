@@ -147,6 +147,7 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 
 int main()
 {
+	vector<float> times = {};
 	vector<int> sizes = {1000, 10000, 50000, 100000};
 
 	for (int i = 0; i < sizes.size(); i++)
@@ -171,6 +172,7 @@ int main()
 		auto seqElapsed = duration_cast<milliseconds>(end - start) / nTests;
 		cout << "Sequential: " << seqElapsed.count() << "ms" << endl;
 		cout << "-----------------------------------------" << endl;
+		times.push_back(seqElapsed.count());
 
 		// PARALLEL
 		start = system_clock::now();
@@ -182,5 +184,24 @@ int main()
 		cout << "Parallel: " << elapsed.count() << "ms" << endl;
 		cout << "Speedup: " << (float)seqElapsed.count() / elapsed.count() << "x" << endl;
 		cout << "-----------------------------------------" << endl;
+		times.push_back(elapsed.count());
+		speedups.push_back((float)seqElapsed.count() / elapsed.count());
+	}
+
+	printVector(times, "Times");
+	printVector(speedups, "Speedups");
+}
+
+void printVector(vector<float> v, string name)
+{
+	for (int i = 0; i < v.size(); i++)
+	{
+		if (i == 0)
+			cout << name << ": [";
+		cout << v[i];
+		if (i != v.size() - 1)
+			cout << ", ";
+		else
+			cout << "]" << endl;
 	}
 }
