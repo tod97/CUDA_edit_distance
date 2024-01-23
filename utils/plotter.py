@@ -32,7 +32,7 @@ for key, time, index in zip(times.keys(), times.values(), range(len(times))):
 
 plt.title('Execution times')
 plt.gcf().canvas.set_window_title('times')
-plt.xlabel('Number of words')
+plt.xlabel('Words length')
 plt.xticks(x_axes)
 plt.ylabel('time (ms)')
 plt.legend()
