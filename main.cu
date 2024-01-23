@@ -4,7 +4,7 @@
 using namespace std;
 using namespace chrono;
 
-#define nTests 10
+#define nTests 5
 // MACROS
 #define MIN(x, y) (x < y ? x : y)
 
@@ -163,7 +163,7 @@ int main()
 {
 	vector<float> times = {};
 	vector<float> speedups = {};
-	vector<int> sizes = {1000, 10000, 50000, 100000};
+	vector<int> sizes = {100, 1000, 10000, 20000, 50000};
 
 	for (int i = 0; i < sizes.size(); i++)
 	{
