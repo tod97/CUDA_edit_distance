@@ -56,14 +56,6 @@ __global__ void editDistKernel(char *devA, char *devB, int lenA, int lenB, unsig
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
 	int diagSize = (diagIdx <= lenA + 1) ? diagIdx : ((2 * (lenA+1)) - diagIdx);
 
-	/* if (tid == 0) {
-		printf("diagSize: %d\n", diagSize);
-		for (int j = 0; j <= lenA; j++) printf("%d ", devPPrevDiag[j]);
-		printf("-----------\n");
-		for (int j = 0; j <= lenA; j++) printf("%d ", devPrevDiag[j]);
-		printf("\n");
-	} */
-
 	if (tid < diagSize) {
 		if (diagIdx <= lenA + 1) {
 			if (tid == 0)
