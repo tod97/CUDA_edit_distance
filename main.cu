@@ -145,9 +145,24 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 	return distance;
 }
 
+void printVector(vector<float> v, string name)
+{
+	for (int i = 0; i < v.size(); i++)
+	{
+		if (i == 0)
+			cout << name << ": [";
+		cout << v[i];
+		if (i != v.size() - 1)
+			cout << ", ";
+		else
+			cout << "]" << endl;
+	}
+}
+
 int main()
 {
 	vector<float> times = {};
+	vector<float> speedups = {};
 	vector<int> sizes = {1000, 10000, 50000, 100000};
 
 	for (int i = 0; i < sizes.size(); i++)
@@ -190,18 +205,4 @@ int main()
 
 	printVector(times, "Times");
 	printVector(speedups, "Speedups");
-}
-
-void printVector(vector<float> v, string name)
-{
-	for (int i = 0; i < v.size(); i++)
-	{
-		if (i == 0)
-			cout << name << ": [";
-		cout << v[i];
-		if (i != v.size() - 1)
-			cout << ", ";
-		else
-			cout << "]" << endl;
-	}
 }
