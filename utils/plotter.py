@@ -17,7 +17,7 @@ for key, speedup, index in zip(speedups.keys(), speedups.values(), range(len(spe
 
 plt.title('Speedups')
 plt.gcf().canvas.set_window_title('speedups')
-plt.xlabel('Number of words')
+plt.xlabel('Words length')
 plt.xticks(x_axes)
 plt.ylabel('speedup')
 plt.legend()
