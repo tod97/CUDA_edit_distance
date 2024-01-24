@@ -2,19 +2,18 @@ import matplotlib.pyplot as plt
 
 x_axes = [100, 1000, 10000, 20000, 50000]
 times = {
-    'sequential': [0, 23, 1714, 6831, 42971]
-    '128 block size': [74, 5, 47, 126, 277]
-    '256 block size': [0, 5, 38, 76, 212]
-    '512 block size': [0, 5, 38, 77, 215]
+    '128 block size': [74, 5, 47, 126, 277],
+    '256 block size': [0, 5, 38, 76, 212],
+    '512 block size': [0, 5, 38, 77, 215],
     '1024 block size': [0, 5, 38, 77, 240]
 }
 speedups = {
-    '128 block size': [0, 4.6, 36.4681, 54.2143, 155.13]
-    '256 block size': [0, 4.6, 45.1053, 89.8816, 202.693]
-    '512 block size': [0, 4.6, 45.1053, 88.7143, 199.865]
+    '128 block size': [0, 4.6, 36.4681, 54.2143, 155.13],
+    '256 block size': [0, 4.6, 45.1053, 89.8816, 202.693],
+    '512 block size': [0, 4.6, 45.1053, 88.7143, 199.865],
     '1024 block size': [0, 4.6, 45.1053, 88.7143, 179.046]
 }
-colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple']
+colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow']
 
 plt.figure(figsize=(10, 8))
 
