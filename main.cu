@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <map>
 #include <vector>
 using namespace std;
 using namespace chrono;
@@ -81,7 +82,7 @@ __global__ void editDistKernel(char *devA, char *devB, int lenA, int lenB, unsig
 	}
 }
 
-int parallelDistance(const char *A, const char *B, int lenA, int lenB)
+int parallelDistance(const char *A, const char *B, int lenA, int lenB, int maxBlockSize)
 {
 	int distance;
 	char *devA;
@@ -113,7 +114,7 @@ int parallelDistance(const char *A, const char *B, int lenA, int lenB)
 
 	for (int i = 3; i < 2 * (lenA + 1); i++)
 	{
-		int blockSize = min(i, 1024);
+		int blockSize = min(i, maxBlockSize);
 		int gridSize = ceil(float(i) / blockSize);
 
 		editDistKernel<<<gridSize, blockSize>>>(devA, devB, lenA, lenB, devPPrevDiag, devPrevDiag, devCurrDiag, i);
@@ -151,11 +152,24 @@ void printVector(vector<float> v, string name)
 	}
 }
 
+void printMap(map<string,vector<float>> m, string name)
+{
+	map<string, vector<float>>::iterator it = m.begin();
+	while (it != m.end()) {
+		cout << "Key: " << it->first << " ";
+		printVector(it->second, name);
+		++it;
+	}
+
+	cout << endl;
+}
+
 int main()
 {
-	vector<float> times = {};
-	vector<float> speedups = {};
+	map<string, vector<float>> times;
+	map<string, vector<float>> speedups;
 	vector<int> sizes = {100, 1000, 10000, 20000, 50000};
+	vector<int> blockSizes = {128, 256, 512, 1024};
 
 	for (int i = 0; i < sizes.size(); i++)
 	{
@@ -179,22 +193,24 @@ int main()
 		auto seqElapsed = duration_cast<milliseconds>(end - start) / nTests;
 		cout << "Sequential: " << seqElapsed.count() << "ms" << endl;
 		cout << "-----------------------------------------" << endl;
-		times.push_back(seqElapsed.count());
+		times["sequential"].push_back(seqElapsed.count());
 
 		// PARALLEL
-		start = system_clock::now();
-		for (int j = 0; j < nTests; j++) {
-			parallelDistance(Awords[j].c_str(), Bwords[j].c_str(), n, n);
+		for (int k = 0; k < blockSizes.size(); k++) {
+			start = system_clock::now();
+			for (int j = 0; j < nTests; j++) {
+				parallelDistance(Awords[j].c_str(), Bwords[j].c_str(), n, n, blockSizes[k]);
+			}
+			end = system_clock::now();
+			auto elapsed = duration_cast<milliseconds>(end - start) / nTests;
+			cout << "Parallel: " << elapsed.count() << "ms" << endl;
+			cout << "Speedup: " << (float)seqElapsed.count() / elapsed.count() << "x" << endl;
+			cout << "-----------------------------------------" << endl;
+			times["Block " + to_string(blockSizes[k])].push_back(elapsed.count());
+			speedups["Block " + to_string(blockSizes[k])].push_back((float)seqElapsed.count() / elapsed.count());
 		}
-		end = system_clock::now();
-		auto elapsed = duration_cast<milliseconds>(end - start) / nTests;
-		cout << "Parallel: " << elapsed.count() << "ms" << endl;
-		cout << "Speedup: " << (float)seqElapsed.count() / elapsed.count() << "x" << endl;
-		cout << "-----------------------------------------" << endl;
-		times.push_back(elapsed.count());
-		speedups.push_back((float)seqElapsed.count() / elapsed.count());
 	}
 
-	printVector(times, "Times");
-	printVector(speedups, "Speedups");
+	printMap(times, "Times");
+	printMap(speedups, "Speedups");
 }
