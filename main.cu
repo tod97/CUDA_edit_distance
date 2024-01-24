@@ -173,17 +173,18 @@ int main()
 
 	for (int i = 0; i < sizes.size(); i++)
 	{
-		int n = sizes[i];
+		int lenA = sizes[i];
+		int lenB = sizes[i];
 		vector<string> Awords = {};
 		vector<string> Bwords = {};
 
 		for (int j = 0; j < nTests; j++)
 		{
-			Awords.push_back(generateWord(n));
-			Bwords.push_back(generateWord(n));
+			Awords.push_back(generateWord(lenA));
+			Bwords.push_back(generateWord(lenB));
 		}
 
-		cout << "--------- STRING LENGTH = " << n << " ---------" << endl;
+		cout << "--------- A = " << lenA << ", B = " << lenB << " ---------" << endl;
 		// SEQUENTIAL
 		auto start = system_clock::now();
 		for (int j = 0; j < nTests; j++) {
@@ -199,7 +200,7 @@ int main()
 		for (int k = 0; k < blockSizes.size(); k++) {
 			start = system_clock::now();
 			for (int j = 0; j < nTests; j++) {
-				parallelDistance(Awords[j].c_str(), Bwords[j].c_str(), n, n, blockSizes[k]);
+				parallelDistance(Awords[j].c_str(), Bwords[j].c_str(), lenA, lenB, blockSizes[k]);
 			}
 			end = system_clock::now();
 			auto elapsed = duration_cast<milliseconds>(end - start) / nTests;
