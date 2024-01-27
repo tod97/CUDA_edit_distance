@@ -169,7 +169,7 @@ int main()
 	map<string, vector<float>> times;
 	map<string, vector<float>> speedups;
 	vector<int> sizes = {100, 1000, 10000, 20000, 50000};
-	vector<int> blockSizes = {128, 256, 512, 1024};
+	vector<int> blockSizes = {32, 64, 128, 256, 512, 1024};
 
 	for (int i = 0; i < sizes.size(); i++)
 	{
