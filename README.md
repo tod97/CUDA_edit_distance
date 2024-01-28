@@ -10,3 +10,4 @@ To be able to run this code, you need to install nvcc as CUDA compiler following
 
 - Before running the main.cu, be sure to have a proper GPU with CUDA support and the CUDA toolkit installed
 - To compile, use the nvcc compiler with the following command: `nvcc -o main.out main.cu`
+- TBH: test are focused to evaluate CUDA raw performance, so the editDistKernel function is verified only with lenA=lenB
